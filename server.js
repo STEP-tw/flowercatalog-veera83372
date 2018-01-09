@@ -5,6 +5,15 @@ const timeStamp = require('./time.js').timeStamp;
 const http = require('http');
 const WebApp = require('./webapp');
 
+const getCommentForm = function () {
+  return `  <h3>Leave a comment</h3>
+    <form class="" action="/addComment" method="post">
+      <label for="">Name:</label><input type="text" name="name" value="" required></input></br>
+      <label for="">Comment:</label><textarea name="comment" value="" required></textarea></br>
+      <input type="submit" name="" value="submit"></input>
+    </form><hr>
+`;
+}
 const getHeadOfHTMlTable = function () {
   return `<table><tr><td>Date</td> <td>Time</td><td>Name</td><td>Comment</td></tr>`;
 }
@@ -48,11 +57,16 @@ const getUserInfoAsHtml = function (user) {
 
 const serveGuestBook = function (req,res) {
   let contents=fs.readFileSync('./public/guestBook.html','utf8');
-  res.response='guestBook.html with comments';
   let header={'content-type':'text/html'};
+  if(req.user){
+    contents += getUserInfoAsHtml(req.user);
+    contents += getCommentForm();
+  }else{
+    contents += '<h4>please login to comment</h4>';
+    contents += `<a href='/login.html'> Login</a>
+    <hr></hr>`;
+  }
   contents +=generateCommentsAsTable();
-  if(req.user)
-    contents += getUserInfoAsHtml(req.user) ;
   respond(res,contents,200,header);
 }
 
