@@ -1,0 +1,31 @@
+body{
+  font-family: sans-serif;
+}
+
+.main-heading{
+  color: orange;
+}
+
+#side-heading{
+	color: orange;
+  margin-right: 100px;
+}
+#image{
+	float: left;
+	border-top: 10px;
+}
+#sub-points{
+	float : right;
+	margin-right: 250px;
+	margin-top: 250px;
+}
+
+#wateryPot{
+	padding-top: 10px;
+	float : center;
+}
+
+#guestBook{
+	float: right;
+	margin-right: 300px;
+}
