@@ -40,11 +40,19 @@ const respond = function (res,content,statusCode,header,encoding) {
   res.end();
 }
 
+const getUserInfoAsHtml = function (user) {
+  return `<h3> hello ${user.name}
+  </h3>
+  <a href='/logout' > Logout </a>`;
+}
+
 const serveGuestBook = function (req,res) {
   let contents=fs.readFileSync('./public/guestBook.html','utf8');
   res.response='guestBook.html with comments';
   let header={'content-type':'text/html'};
   contents +=generateCommentsAsTable();
+  if(req.user)
+    contents += getUserInfoAsHtml(req.user) ;
   respond(res,contents,200,header);
 }
 
@@ -56,12 +64,13 @@ const addComment = function(req, res) {
   return;
 }
 
-const validateResourceAcess = function (req,res) {
-  if(req.urlIsOneOf(['/addComment']) && !req.user)
+const redirectLoggedOutUserToLogin = function (req,res) {
+  if(req.urlIsOneOf(['/addComment','/logout']) && !req.user)
     res.redirect('login.html');
 }
 
-let registered_users = [{userName:'veera',name:'Bhanu Teja Verma'}];
+let registered_users = [{userName:'veera',name:'veera venkata durga prasad'}];
+
 let toS = o=>JSON.stringify(o,null,2);
 
 let logRequest = (req,res)=>{
@@ -84,10 +93,15 @@ let loadUser = (req,res)=>{
   }
 };
 
+let redirectLoggedInUserToGuestBook = (req,res)=>{
+  if(req.urlIsOneOf(['/login.html']) && req.user) res.redirect('/guestBook.html');
+}
+
 let app = WebApp.create();
 app.use(logRequest);
 app.use(loadUser);
-app.use(validateResourceAcess);
+app.use(redirectLoggedInUserToGuestBook);
+app.use(redirectLoggedOutUserToLogin);
 
 app.get('/guestBook.html',serveGuestBook);
 app.post('/addComment',addComment);
@@ -100,11 +114,16 @@ app.post('/login',(req,res)=>{
     return;
   }
   let sessionid = new Date().getTime();
-  res.setHeader('Set-Cookie',`sessionid=${sessionid} , logOn=true `);
+  res.setHeader('Set-Cookie',`sessionid=${sessionid}`);
   user.sessionid = sessionid;
   res.redirect('guestBook.html');
 });
 
+app.get('/logout',(req,res)=>{
+  res.setHeader('Set-Cookie',[`loginFailed=false,Expires=${new Date(1).toUTCString()}`,`sessionid=0,Expires=${new Date(1).toUTCString()}`]);
+  delete req.user.sessionid;
+  res.redirect('/login.html');
+});
 
 app.postProcess(servFile);
 app.postProcess(resourceNotFound);
