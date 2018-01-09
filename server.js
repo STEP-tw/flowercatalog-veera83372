@@ -87,9 +87,24 @@ let loadUser = (req,res)=>{
 let app = WebApp.create();
 app.use(logRequest);
 app.use(loadUser);
+app.use(validateResourceAcess);
 
 app.get('/guestBook.html',serveGuestBook);
 app.post('/addComment',addComment);
+
+app.post('/login',(req,res)=>{
+  let user = registered_users.find(u=>u.userName==req.body.userName);
+  if(!user) {
+    res.setHeader('Set-Cookie',`logOn=false`);
+    res.redirect('/login.html');
+    return;
+  }
+  let sessionid = new Date().getTime();
+  res.setHeader('Set-Cookie',`sessionid=${sessionid} , logOn=true `);
+  user.sessionid = sessionid;
+  res.redirect('guestBook.html');
+});
+
 
 app.postProcess(servFile);
 app.postProcess(resourceNotFound);
