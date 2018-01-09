@@ -17,6 +17,18 @@ let redirect = function(path){
   this.end();
 };
 
+const respond = function (content,statusCode,header,encoding) {
+  let headerKeys = Object.keys(header);
+  let self=this
+  headerKeys.forEach(function(key){
+    self.setHeader(key,header[key]);
+  });
+  self.statusCode=statusCode;
+  self.write(content,encoding);
+  self.end();
+}
+
+
 const parseCookies = text=> {
   try {
     return text && text.split(';').map(toKeyValue).reduce(accumulate,{}) || {};
@@ -60,6 +72,7 @@ let urlIsOneOf = function(urls){
 
 const main = function(req,res){
   res.redirect = redirect.bind(res);
+  res.respond=respond.bind(res);
   req.urlIsOneOf = urlIsOneOf.bind(req);
   req.cookies = parseCookies(req.headers.cookie||'');
   let content="";

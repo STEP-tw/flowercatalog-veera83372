@@ -11,9 +11,9 @@ const getCommentForm = function () {
       <label for="">Name:</label><input type="text" name="name" value="" required></input></br>
       <label for="">Comment:</label><textarea name="comment" value="" required></textarea></br>
       <input type="submit" name="" value="submit"></input>
-    </form><hr>
-`;
+    </form><hr>`;
 }
+
 const getHeadOfHTMlTable = function () {
   return `<table><tr><td>Date</td> <td>Time</td><td>Name</td><td>Comment</td></tr>`;
 }
@@ -39,15 +39,6 @@ const resourceNotFound = function (req,res) {
   res.end();
 }
 
-const respond = function (res,content,statusCode,header,encoding) {
-  let headerKeys = Object.keys(header);
-  headerKeys.forEach(function (key) {
-    res.setHeader(key,header[key]);
-  });
-  res.statusCode=statusCode;
-  res.write(content,encoding);
-  res.end();
-}
 
 const getUserInfoAsHtml = function (user) {
   return `<h3> hello ${user.name}
@@ -66,8 +57,7 @@ const serveGuestBook = function (req,res) {
     contents += `<a href='/login.html'> Login</a>
     <hr></hr>`;
   }
-  contents +=generateCommentsAsTable();
-  respond(res,contents,200,header);
+  res.respond(contents,200,header);
 }
 
 const addComment = function(req, res) {
@@ -111,11 +101,18 @@ let redirectLoggedInUserToGuestBook = (req,res)=>{
   if(req.urlIsOneOf(['/login.html']) && req.user) res.redirect('/guestBook.html');
 }
 
+
+const serveComments = function (req,res) {
+  let commentsAsHTML= generateCommentsAsTable();
+  res.respond(commentsAsHTML,200,{'content-type':'text/html'});
+}
+
 let app = WebApp.create();
 app.use(logRequest);
 app.use(loadUser);
 app.use(redirectLoggedInUserToGuestBook);
 app.use(redirectLoggedOutUserToLogin);
+
 
 app.get('/guestBook.html',serveGuestBook);
 app.post('/addComment',addComment);
@@ -132,6 +129,8 @@ app.post('/login',(req,res)=>{
   user.sessionid = sessionid;
   res.redirect('guestBook.html');
 });
+
+app.get('/comments',serveComments);
 
 app.get('/logout',(req,res)=>{
   res.setHeader('Set-Cookie',[`loginFailed=false,Expires=${new Date(1).toUTCString()}`,`sessionid=0,Expires=${new Date(1).toUTCString()}`]);

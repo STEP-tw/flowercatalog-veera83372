@@ -1,17 +1,6 @@
 
 const fs = require('fs');
 
-const respond = function (res,content,statusCode,header,encoding) {
-  let headerKeys = Object.keys(header);
-  headerKeys.forEach(function (key) {
-    res.setHeader(key,header[key]);
-  });
-  res.statusCode=statusCode;
-  res.write(content,encoding);
-  res.end();
-}
-
-
 const fileContentTypeAndEncoding = {
   '.html': {
     contentType: 'text/html',
@@ -74,7 +63,7 @@ const servFile = function(req, res) {
   let header ={'content-type':contentType};
   if(fs.existsSync(path)){
    content=fs.readFileSync(path,encoding);
-   respond(res,content,200,header,encoding);
+   res.respond(content,200,header,encoding);
    return ;
  }
   return;
