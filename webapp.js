@@ -8,7 +8,7 @@ const accumulate = (o,kv)=> {
   return o;
 };
 
-const parseBody = text=> text && text.split('&').map(toKeyValue).reduce(accumulate,{}) || {};
+const parseBody = text=> text&& decodeURIComponent(text) && text.split('&').map(toKeyValue).reduce(accumulate,{}) || {};
 
 let redirect = function(path){
   console.log(`redirecting to ${path}`);

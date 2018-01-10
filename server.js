@@ -39,12 +39,6 @@ const getUserInfoAsHtml = function (user) {
   <a href='/logout' > Logout </a>`;
 }
 
-// const serveGuestBook = function (req,res) {
-//   let contents=fs.readFileSync('./public/guestBook.html','utf8');
-//   let header={'content-type':'text/html'};
-//   res.respond(contents,200,header);
-// }
-
 const addComment = function(req, res) {
   let commentInfo=req.body;
     if(commentInfo.name&&commentInfo.comment)
@@ -107,7 +101,6 @@ app.use(redirectLoggedInUserToGuestBook);
 app.use(redirectLoggedOutUserToLogin);
 
 
-// app.get('/guestBook.html',serveGuestBook);
 app.post('/addComment',addComment);
 app.get('/loginStatus',respondWithLoginStatus);
 app.post('/login',(req,res)=>{
