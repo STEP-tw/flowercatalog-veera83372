@@ -5,14 +5,7 @@ const timeStamp = require('./time.js').timeStamp;
 const http = require('http');
 const WebApp = require('./webapp');
 
-const getCommentForm = function () {
-  return `  <h3>Leave a comment</h3>
-    <form class="" action="/addComment" method="post">
-      <label for="">Name:</label><input type="text" name="name" value="" required></input></br>
-      <label for="">Comment:</label><textarea name="comment" value="" required></textarea></br>
-      <input type="submit" name="" value="submit"></input>
-    </form><hr>`;
-}
+
 
 const getHeadOfHTMlTable = function () {
   return `<table><tr><td>Date</td> <td>Time</td><td>Name</td><td>Comment</td></tr>`;
@@ -46,19 +39,11 @@ const getUserInfoAsHtml = function (user) {
   <a href='/logout' > Logout </a>`;
 }
 
-const serveGuestBook = function (req,res) {
-  let contents=fs.readFileSync('./public/guestBook.html','utf8');
-  let header={'content-type':'text/html'};
-  if(req.user){
-    contents += getUserInfoAsHtml(req.user);
-    contents += getCommentForm();
-  }else{
-    contents += '<h4>please login to comment</h4>';
-    contents += `<a href='/login.html'> Login</a>
-    <hr></hr>`;
-  }
-  res.respond(contents,200,header);
-}
+// const serveGuestBook = function (req,res) {
+//   let contents=fs.readFileSync('./public/guestBook.html','utf8');
+//   let header={'content-type':'text/html'};
+//   res.respond(contents,200,header);
+// }
 
 const addComment = function(req, res) {
   let commentInfo=req.body;
@@ -101,6 +86,14 @@ let redirectLoggedInUserToGuestBook = (req,res)=>{
   if(req.urlIsOneOf(['/login.html']) && req.user) res.redirect('/guestBook.html');
 }
 
+let respondWithLoginStatus = function (req,res) {
+  let loginStatus;
+  if(req.user){
+    res.respond(getUserInfoAsHtml(req.user),200,{'content-type':'text/html'});
+  }else{
+    res.respond('false',200,{});
+  }
+}
 
 const serveComments = function (req,res) {
   let commentsAsHTML= generateCommentsAsTable();
@@ -114,9 +107,9 @@ app.use(redirectLoggedInUserToGuestBook);
 app.use(redirectLoggedOutUserToLogin);
 
 
-app.get('/guestBook.html',serveGuestBook);
+// app.get('/guestBook.html',serveGuestBook);
 app.post('/addComment',addComment);
-
+app.get('/loginStatus',respondWithLoginStatus);
 app.post('/login',(req,res)=>{
   let user = registered_users.find(u=>u.userName==req.body.userName);
   if(!user) {
